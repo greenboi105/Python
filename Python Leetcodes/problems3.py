@@ -3,6 +3,216 @@ from collections import *
 class Solution: 
 
     """
+    FIND ORIGINAL ARRAY FROM DOUBLED ARRAY
+
+    Given an array changed, return original if changed is a doubled array. 
+
+    If changed is not a doubled array, return an empty array. The elements in original may be retuend in any order.
+    """
+
+    def findOriginalArray(self, changed):
+
+        if len(changed) <= 1 or len(changed) % 2 == 1: return []
+
+        changed.sort()
+        occurrences = Counter(changed)
+        res = []
+
+        for key in sorted(list(occurrences)):
+
+            if key not in occurrences: continue
+
+            if key == 0: 
+                number_removals = occurrences[key] // 2
+                res += [key for _ in range(number_removals)]
+                continue 
+
+            double_key = 2 * key
+
+            if double_key in occurrences: 
+
+                number_removals = min(occurrences[key], occurrences[double_key])
+
+                res += [key for _ in range(number_removals)]
+
+                occurrences[double_key] -= number_removals
+                occurrences[key] -= number_removals
+
+                if occurrences[double_key] == 0: del occurrences[double_key]
+                if occurrences[key] == 0: del occurrences[key]
+
+        return res if len(res) == len(changed) // 2 else []
+
+    """
+    INCREMENTAL MEMORY LEAK
+
+    You are given two integers memory1 and memory2 representing the available memory in bits on two memory sticks.
+
+    There is currently a faulty program running that consumes an increasing amount of memory each second.
+    """
+
+    def memLeak(self, memory1, memory2):
+
+        current_time = 1
+        current_memory = 1
+
+        while True:
+
+            if current_memory > max(memory1, memory2): break
+
+            if memory1 >= memory2: memory1 -= current_memory
+            else: memory2 -= current_memory
+
+            current_memory += 1
+            current_time += 1
+
+        return [current_time, memory1, memory2]
+
+    """
+    SORT FEATURES BY POPULARITY
+
+    Return the features in sorted order.
+    """
+
+    def sortFeatures(self, features, responses):
+
+        word_counts = defaultdict(int)
+
+        for response in responses: 
+
+            response_words = set(response.split())
+
+            for feature in features: 
+                if feature in response_words: word_counts[feature] += 1
+
+        original_indices = {feature: feature_index for feature_index, feature in enumerate(features)}
+
+        res = features[:]
+
+        return sorted(res, key = lambda x: (-word_counts[x], original_indices[x]))
+
+    """
+    REDUCTION OPERATIONS TO MAKE THE ARRAY ELEMENTS EQUAL
+
+    Return the number of operations to make all elements in nums equal.
+    """
+
+    def reductionOperations(self, nums):
+
+        sorted_nums = sorted(nums)
+
+        min_element = sorted_nums[0]
+        current_required = 0
+        current_num = min_element
+        res = 0
+
+        for num in sorted_nums[1:]:
+
+            if num != current_num: 
+                current_num = num 
+                current_required += 1
+            
+            if num != min_element: 
+                res += current_required
+
+        return res 
+
+    """
+    SORT INTEGERS BY THE POWER VALUE
+
+    Return the kth integer in the range [lo, hi] sorted by the power value.
+    """
+
+    def getKth(self, lo: int, hi: int, k: int) -> int: 
+
+        def num_steps(number):
+            res = 0
+
+            while number != 1:
+                if number % 2 == 0: 
+                    number = number / 2
+                    res += 1
+                else: 
+                    number = 3 * number + 1
+                    res += 1
+
+            return res 
+
+        numbers = sorted([num for num in range(lo, hi + 1)], key = lambda x: (num_steps(x), x))
+
+        return numbers[k - 1]
+
+    """
+    THOUSAND SEPARATOR
+
+    Given an integer n, add a dot (".") as the thousands separator and return it in string format.
+    """
+
+    def thousandSeparator(self, n: int) -> str:
+
+        if n < 1000: return str(n)
+
+        counter = 3
+        res = []
+
+        number_string = str(n)[::-1]
+
+        for char in number_string:
+
+            counter -= 1
+
+            if counter == 0: 
+                res.append(char)
+                res.append(".") 
+                counter = 3
+            else: res.append(char)
+
+        if res[-1] == '.': res.pop()
+
+        return "".join(res[::-1])
+
+    """
+    DECREASE ELEMENTS TO MAKE ARRAY ZIGZAG
+
+    Given an array nums of integers, a move consists of choosing any element and decreasing it by 1.
+
+    Return the minimum number of moves to transform the given array nums into a zigzag array.
+    """
+
+    def movesToMakeZigzag(self, nums):
+
+        if len(nums) == 1: return 0
+        
+        even_removals = 0
+        odd_removals = 0
+
+        for i in range(0, len(nums), 2):
+            
+            if i == 0: 
+                if nums[i] < nums[i + 1]: continue 
+                else: even_removals += (nums[i] - nums[i + 1]) + 1
+            elif i == len(nums) - 1:
+                if nums[i] < nums[i - 1]: continue 
+                else: even_removals += (nums[i] - nums[i - 1]) + 1
+            else:
+                if nums[i] < nums[i + 1] and nums[i] < nums[i - 1]: continue
+                else: even_removals += nums[i] - min(nums[i + 1], nums[i - 1]) + 1
+
+        for i in range(1, len(nums), 2):
+
+            if i == 0: 
+                if nums[i] < nums[i + 1]: continue 
+                else: odd_removals += (nums[i] - nums[i + 1]) + 1
+            elif i == len(nums) - 1:
+                if nums[i] < nums[i - 1]: continue 
+                else: odd_removals += (nums[i] - nums[i - 1]) + 1
+            else:
+                if nums[i] < nums[i + 1] and nums[i] < nums[i - 1]: continue
+                else: odd_removals += nums[i] - min(nums[i + 1], nums[i - 1]) + 1
+
+        return min(odd_removals, even_removals)
+
+    """
     FIND ALL LONELY NUMBERS IN THE ARRAY 
 
     You are given an integer array nums. A number x is lonely when it appears only once, and no adjacent numbers appear in the array.

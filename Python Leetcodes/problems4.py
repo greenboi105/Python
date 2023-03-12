@@ -1,8 +1,220 @@
 from collections import *
+from itertools import *
+from copy import *
 import heapq 
 import math 
 
 class Solution:
+
+    """
+    RANK TEAMS BY VOTES
+
+    In a speical ranking system, each voter gives a rank from highest to lowest to all teams participating in the competition.
+
+    Return a string of all teams sorted by the ranking system.
+    """
+
+    def rankTeams(self, votes):
+
+        rankings = {}
+
+        for vote in votes:
+
+            for i, char in enumerate(vote):
+                if char not in rankings: rankings[char] = [0] * len(vote)
+                rankings[char][i] += 1
+
+        voted_names = sorted(rankings.keys())
+
+        return "".join(sorted(voted_names, key = lambda x: rankings[x], reverse=True))
+
+    """
+    MAXIMUM NUMBER OF NON-OVERLAPPING SUBARRAYS WITH SUM EQUALS TARGET
+
+    Given an array nums and an integer target, return the maximum number of non-empty non-overlapping subarrays such that the sum of values in each subarray is equal to target.
+    """
+
+    def maxNonOverlapping(self, nums, target):
+
+        seen = set([0])
+        res = curr = 0
+
+        for i, num in enumerate(nums):
+            curr += num 
+            prev = curr - target 
+
+            if prev in seen:
+                res += 1
+                seen = set()
+
+            seen.add(curr)
+
+        return res 
+
+    """
+    MINIMUM INSERTIONS TO BALANCE A PARENTHESES STRING
+
+    Return the minimum number of insertions needed to make s balanced.
+    """
+
+    def minInsertions(self, s):
+
+        res = right = 0
+
+        for char in s:
+
+            if char == '(':
+                if right % 2: 
+                    right -= 1
+                    res += 1
+                right += 2
+
+            if char == ')':
+                right -= 1
+                if right < 0:
+                    right += 2
+                    res += 1
+
+        return right + res 
+
+    """
+    NUMBER OF SUBARRAYS OF SIZE K AND AVERAGE GREATER THAN OR EQUAL TO THRESHOLD
+
+    Given an array of integers arr and two integers k and threshold, return the number of subarrays of size k and average greater than or equal to threshold.
+    """
+
+    def numOfSubarrays(self, arr, k, threshold):
+
+        res = 0
+        window_sum = 0
+
+        for right in range(len(arr)):
+
+            window_sum += arr[right]
+
+            if right >= k:
+                window_sum -= arr[right - k]
+
+            if right >= k - 1:
+                window_average = window_sum // k 
+
+                if window_average >= threshold: res += 1
+
+        return res 
+    
+    """
+    MAXIMUM ELEMENT AFTER DECREASING AND REARRANGING
+
+    Return the maximum possible value of an element in arr after performing the operations to satisfy the conditions.
+    """
+
+    def maximumElementAfterDecrementingAndRearranging(self, arr):
+
+        sorted_nums = sorted(arr)
+
+        if sorted_nums[0] != 1: sorted_nums[0] = 1
+
+        for i in range(1, len(arr)):
+            if sorted_nums[i] - sorted_nums[i - 1] > 1: sorted_nums[i] = sorted_nums[i - 1] + 1
+
+        return sorted_nums[-1]
+
+    """
+    REMOVE ALL OCCURRENCES OF A SUBSTRING
+
+    Return s after removing all occurrences of part.
+    """
+
+    def removeOccurrences(self, s, part):
+
+        to_remove = ""
+        right = 0
+
+        while right < len(s):
+
+            to_remove += s[right]
+
+            if part in to_remove:
+                to_remove = to_remove.replace(part, "")
+
+            right += 1
+
+        return to_remove
+
+    """
+    MINIMUM PATH COST IN A GRID
+
+    Return the minimum cost of a path that starts from any cell in the first row and ends at any cell in the last row.
+    """
+
+    def minPathCost(self, grid, moveCost):
+
+        m, n = len(grid), len(grid[0])
+
+        grid_update = deepcopy(grid)
+
+        for row in range(1, m):
+            for col in range(n):
+                grid_update[row][col] += min([grid_update[row - 1][k] + moveCost[grid[row - 1][k]][col] for k in range(n)])
+        
+        return min(grid_update[-1])
+
+    """
+    ARRAY OF DOUBLED PAIRS
+
+    Given an integer array of even length arr, return True if it is possible to reorder arr such that arr[2 * i + 1] = 2 * arr[2 * i] for every 0 <= i < len(arr) / 2, or False otherwise.
+    """
+
+    def canReorderDoubled(self, arr):
+
+        arr.sort(key = lambda x: abs(x))
+        counts = Counter(arr)
+
+        for i in range(len(arr)):
+
+            if 2 * arr[i] in counts and arr[i] in counts:
+
+                if arr[i] == 0: 
+                    counts[arr[i]] -= 2
+                    if counts[arr[i]] == 0: del counts[arr[i]]
+                else:
+                    counts[2 * arr[i]] -= 1
+                    counts[arr[i]] -= 1
+
+                    if counts[2 * arr[i]] == 0: del counts[2 * arr[i]]
+                    if counts[arr[i]] == 0: del counts[arr[i]]
+
+        return len(counts) == 0
+
+    """
+    MAP OF HIGHEST PEAK
+
+    Return an integer matrix height of size m x n where height[i][j] is cell (i, j)'s height. 
+
+    If there are multiple solutions, return any of them.
+    """
+
+    def highestPeak(self, isWater):
+
+        m, n = len(isWater), len(isWater[0])
+        seen = set((r, c) for r, c in product(range(m), range(n)) if isWater[r][c] == 1)
+        queue = deque([(0, r, c) for r, c in product(range(m), range(n)) if isWater[r][c] == 1])
+        res = [[None for _ in range(n)] for _ in range(m)]
+
+        while queue:
+
+            dist, r, c = queue.popleft()
+
+            res[r][c] = dist
+
+            for nr, nc in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
+
+                if 0 <= r + nr < m and 0 <= c + nc < n and (r + nr, c + nc) not in seen:
+
+                    queue.append((dist + 1, r + nr, c + nc))
+                    seen.add((r + nr, c + nc))
+
+        return res
 
     """
     CAN MAKE ARITHMETIC PROGRESSION FROM SEQUENCE 

@@ -1,5 +1,6 @@
 import math
 from collections import *
+import heapq
 
 class Solution:
 
@@ -754,3 +755,191 @@ class Solution:
         # Return True if we've managed to visit every possible room
         return all(seen)
     
+    """
+    K HIGHEST RANKED ITEMS WITHIN A PRICE RANGE
+
+    Return the k highest-ranked items within the price range sorted by their rank (highest to lowest).
+    """
+
+    def highestRankedKItems(self, grid, pricing, start, k):
+
+        m, n = len(grid), len(grid[0])
+        queue = deque([(0, start[0], start[1])])
+        seen = set([(start[0], start[1])])
+        valid_tiles = []
+        min_price, max_price = pricing[0], pricing[1]
+
+        while queue:
+
+            steps, r, c = queue.popleft()
+
+            if min_price <= grid[r][c] <= max_price: 
+                valid_tiles.append([steps, grid[r][c], r, c])
+
+            for nr, nc in [(-1, 0), (0, -1), (1, 0), (0, 1)]:
+
+                if 0 <= r + nr < m and 0 <= c + nc < n and (r + nr, c + nc) not in seen and grid[r + nr][c + nc] != 0:
+                    queue.append((steps + 1, r + nr, c + nc))
+                    seen.add((r + nr, c + nc))
+
+        valid_tiles.sort(key = lambda x: (x[0], x[1], x[2], x[3]))
+
+        return [[valid_tiles[i][2], valid_tiles[i][3]] for i in range(min(len(valid_tiles), k))]
+
+    """
+    DESTROYING ASTEROIDS
+
+    Return True if all asteroids can be destroyed.
+
+    Otherwise, return False.
+    """
+
+    def asteroidsDestroyed(self, mass, asteroids):
+
+        asteroids.sort()
+
+        current_size = mass
+
+        for asteroid in asteroids:
+
+            if current_size < asteroid: return False 
+            else: current_size += asteroid
+
+        return True
+
+    """
+    PATH WITH MAXIMUM MINIMUM VALUE 
+
+    Given an m x n integer matrix grid, return the maximum score of a path starting at (0, 0) and ending at (m - 1, n - 1) moving in the 4 cardinal directions.
+
+    The score of a path is the minimum value in that path.
+    """
+
+    def maximumMinimumPath(self, grid):
+
+        heap = [(-grid[0][0], 0, 0)]
+        seen = set([(0, 0)])
+        res = float('inf')
+        m, n = len(grid), len(grid[0])
+
+        while heap:
+
+            heap_val, r, c = heapq.heappop(heap)
+
+            val = -heap_val
+
+            res = min(res, val)
+
+            if r == m - 1 and c == n - 1: return res
+
+            for nr, nc in [(0, 1), (1, 0), (-1, 0), (0, -1)]:
+
+                if 0 <= r + nr < m and 0 <= c + nc < n and (r + nr, c + nc) not in seen:
+
+                    heapq.heappush(heap, (-grid[r + nr][c + nc], r + nr, c + nc))
+
+                    seen.add((r + nr, c + nc))
+
+    """
+    DETECT CYCLES IN A 2D GRID
+
+    Return True if any cycle of the same value exists in grid, otherwise return False.
+    """
+
+    def containsCycle(self, grid):
+
+        def dfs(node, parent):
+
+            if node in visited: return True
+            visited.add(node)
+            nx,ny = node
+
+            neighbours = [(cx, cy) for cx, cy in [[nx + 1, ny],[nx - 1, ny],[nx, ny + 1], [nx, ny - 1]] if 0 <= cx < m and 0 <= cy < n and grid[cx][cy] == grid[nx][ny] and (cx,cy) != parent]
+
+            for x in neighbours:
+                if dfs(x, node): return True 
+
+            return False  
+    
+        m, n = len(grid), len(grid[0])
+        visited = set()
+
+        for i in range(m):
+            for j in range(n):
+                if (i,j) in visited: continue 
+                if dfs((i,j), None): return True
+
+        return False 
+
+    """
+    FIND THE INDEX OF THE FIRST OCCURRENCE IN A STRING
+
+    Given two strings needle and haystack, return the index of the first occurrence of needle in haystack, or -1 if needle is not part of haystack.
+    """
+
+    def strStr(self, haystack, needle):
+  
+        left = 0
+
+        # Slide the right pointer
+        for right in range(len(haystack)):
+            
+            # If the right pointer is sufficiently slid to accomodate a window
+            if right >= len(needle) - 1: 
+                
+                # Determine the current window
+                current_slice = haystack[left:right + 1]
+
+                # If the window is equal to the pattern we want to find, return the left index
+                if current_slice == needle: return left
+                
+                # Otherwise we need to slide the left pointer as well
+                left += 1
+
+        return -1
+
+    """
+    REPEATED SUBSTRING PATTERN
+
+    Given a string s, check if it can be constructed by taking a substring of it and appending multiple copies of the substring together.
+    """
+
+    def repeatedSubstringPattern(self, s):
+        N = len(s)
+        return any([N % i == 0 and s[:i] * (N // i) == s for i in range(1, N // 2 + 1)])
+
+    """
+    STRING TO INTEGER (ATOI)
+
+    Implement the myAtoi(string s) function, which converts a string to a 32-bit signed integer (similar to C/C++'s atoi function).
+    """
+
+    def myAtoi(self, s: str):
+    
+        s = s.strip()
+
+        res = []
+        for char in s:
+
+            if (char == '-' or char == '+') and not res: res.append(char)
+            elif char.isdigit(): res.append(char)
+            elif not char.isdigit(): break 
+
+        if not res or set(res) == {'-'} or set(res) == {'+'}: return 0
+        if res[0] == '+': res.pop(0)
+        
+        pruned_res = res[:]
+        prev_char = None
+        for char in res:
+            if prev_char == '0' and char in ['-', '+']: return 0
+            if char == '0': pruned_res.remove('0')
+            elif char != '0': break
+            prev_char = char
+
+        if not pruned_res: return 0
+
+        num_res = int("".join(pruned_res))
+
+        if num_res < -(2 ** 31): return -(2 ** 31)
+        elif num_res > (2 ** 31 - 1): return 2 ** 31 - 1
+        else: return num_res

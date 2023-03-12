@@ -879,3 +879,258 @@ class Solution:
 
         return res
     
+    """
+    STRING WITHOUT AAA OR BBB
+
+    Given two integers a and b, return any string s such that:
+
+        - s has length a + b and contains exactly a 'a' letters and b 'b' letters,
+
+        - The substring 'aaa' does not occur in s, and 
+
+        - The substring 'bbb' does not occur in s.
+    """
+
+    def strWithout3a3b(self, A: int, B: int):
+
+        ans = []
+
+        # So long as there are characters to write
+        while A or B:
+            
+            # Determine if we should write an 'a' character or 'b' character depending on the current result
+            if len(ans) >= 2 and ans[-1] == ans[-2]: writeA = ans[-1] == 'b'
+            else: writeA = A >= B
+
+            # Add the determined character
+            if writeA:
+                A -= 1
+                ans.append('a')
+            else:
+                B -= 1
+                ans.append('b')
+
+        # Return the result after adding the characters
+        return "".join(ans)
+
+    """
+    REMOVE COLORED PIECES IF BOTH NEIGHBORS ARE THE SAME COLOR
+
+    There are n pieces arranged in a line, and each piece is colored either by 'A' or by 'B'.
+
+    You are given a string colors of length n where colors[i] is the color of the ith piece.
+
+    Alice and Bob are playing a game where they take alternating turns removing pieces from the line.
+
+    Assuming Alice and Bob play optimally, return True if Alice wins or False if Bob wins.
+    """
+
+    def winnerOfGame(self, colors):
+
+        alice_count, bob_count, consecutive_colors = 0, 0, 0
+
+        # Process all the colors in the string
+        for current_color in colors:
+            
+            # If the current character is equal to the previous character
+            if current_color == previous_color:
+                consecutive_colors += 1
+                if consecutive_colors == 3:
+                    if current_color == 'A': alice_count += 1
+                    elif current_color == 'B': bob_count += 1
+
+            elif current_color != previous_color: consecutive_colors = 1 
+    
+            previous_color = current_color 
+        
+        # If Alice and Bob both have an equal number of pieces removed, Alice will lose by default as such Alice makes her move first
+        return alice_count > bob_count
+    
+    """
+    MONOTONIC ARRAY
+
+    Given an integer array nums, return True if the given array is monotonic, or False otherwise.
+    """
+
+    def isMonotonic(self, nums):
+        return all(nums[i] >= nums[i - 1] for i in range(1, len(nums))) or all(nums[i] <= nums[i - 1] for i in range(1, len(nums)))
+    
+    """
+    CHECK IF WORD EQUALS SUMMATION OF TWO WORDS
+
+    The letter value of a letter its position in the alphabet starting from 0.
+
+    The numerical value of some string of lowercase English letters s is the concatenation of the letter values of each letter in s, which is then converted into an integer.
+
+    You are given three strings firstWord, secondWord, and targetWord, each consisting of lowercase English letters 'a' through 'j' inclusive.
+
+    Return True if the summation of the numerical values of firstWord and secondWord equals the numerical value of targetWord, or False otherwise.
+    """
+    
+    def isSumEqual(self, firstWord, secondWord, targetWord):
+        def convert_number(word):
+            return int("".join([str(ord(word[i]) - ord('a')) for i in range(len(word))]))
+        return convert_number(firstWord) + convert_number(secondWord) == convert_number(targetWord)
+    
+    """
+    CHECK IF NUMBERS ARE ASCENDING IN A SENTENCE
+
+    Given a string s representing a sentence, you need to check if all the numbers in s are strictly increasing from left to right. Return True if so, or False otherwise.
+    """
+
+    def areNumbersAscending(self, s: str):
+        nums = [int(word) for word in s.split() if word.isdigit()]
+        return all([nums[i - 1] < nums[i] for i in range(1, len(nums))])
+
+    """
+    SECOND LARGEST DIGIT IN A STRING
+
+    Given an alphanumeric string s, return the second largest numerical digit that appears in s, or -1 if it does not exist.
+
+    An alphanumeric string is a string consisting of lowercase English letters and digits.
+    """
+
+    def secondHighest(self, s: str):
+        num_list = sorted(list(set(int(char) for char in s if char.isdigit())))
+        return num_list[-2] if len(num_list) > 1 else -1
+
+    """
+    REMOVE ONE ELEMENT TO MAKE THE ARRAY STRICTLY INCREASING
+
+    Given a 0-indexed integer array nums, return True if it can be made strictly increasing after removing exactly one element, or False otherwise. If the array is already strictly increasing, return True. 
+    """
+
+    def canBeIncreasing(self, nums: list):
+
+        def checkIncreasing(A):
+            return all(A[i] > A[i - 1] for i in range(1, len(A)))
+
+        # If the initial list is already increasing, return True
+        if checkIncreasing(nums): return True 
+
+        # Otherwise consider removing the element at all possible indices to determine if the remaining list has only increasing elements
+        for i in range(len(nums)):
+            nums_copy = nums[:]
+            nums_copy.pop(i)
+            if checkIncreasing(nums_copy): return True 
+
+        # If all removals did not yield an increasing list, return False
+        return False
+
+    """
+    MINIMUM DISTANCE TO THE TARGET ELEMENT
+
+    Given an integer array nums and two integers target and start, find an index i such that nums[i] == target and abs(i - start) is minimized. Return abs(i - start). 
+    """
+
+    def getMinDistance(self, nums, target, start):
+        index_list = [i for i in range(len(nums)) if nums[i] == target]
+        return min([abs(index - start) for index in index_list])
+
+    """
+    MAXIMUM DIFFERENCE BETWEEN INCREASING ELEMENTS
+
+    Given a 0-indexed integer array nums of size n, find the maximum difference between nums[i] and nums[j] such that 0 <= i < j < n and nums[i] < nums[j]. Return the maximum difference. If no such i and j exists, return -1.
+    """
+
+    def maximumDifference(self, nums: list):
+        min_val, max_diff = float('inf'), 0
+
+        # Process all the elements in the list
+        for num in nums: 
+            if num < min_val: min_val = num
+            else: max_diff = max(max_diff, num - min_val)
+
+        # Return the maximum difference if there is one otherwise -1
+        return max_diff if max_diff != 0 else -1
+
+    """
+    COUNTING WORDS WITH A GIVEN PREFIX
+
+    You are given an array of strings words and a string pref.
+
+    Return the number of strings in words that contain pref as a prefix.
+
+    A prefix of a string s is any leading contiguous substring of s.
+    """
+
+    def prefixCount(self, words: list[str], pref: str):
+        return sum([word.startswith(pref) for word in words])
+
+    """
+    LENGTH OF LAST WORD
+
+    Given a string s consisting of words and spaces, return the length of the last word in the string.
+    """
+    def lengthOfLastWord(self, s: str):
+        return 0 if not s or s.isspace() else len(s.split()[-1])
+
+    """
+    CHECK IF NUMBER HAS EQUAL DIGIT COUNT AND DIGIT VALUE
+
+    You are given a 0-indexed string num of length n consisting of digits.
+
+    Return True if for every index i in the range 0 <= i < n, the digit i occurs num[i] times in num, otherwise return False.
+    """
+
+    def digitCount(self, num: str):
+        num_counts = Counter(num)
+        return all(num_counts[str(i)] == int(num[i]) for i in range(len(num)))
+
+    """
+    MAXIMUM NUMBER OF WORDS FOUND IN SENTENCES
+
+    A sentence is a list of words that are separated by a single space with no leading or trailing spaces.
+
+    You are given an array of strings sentences, where each sentences[i] represents a single sentence.
+
+    Return the maximum number of words that appear in a single sentence.
+    """
+
+    def mostWordsFound(self, sentences):
+        return max(len(sentence.split()) for sentence in sentences)
+
+    """
+    SORT EVEN AND ODD INDICES INDEPENDENTLY
+
+    You are given a 0-indexed integer array nums. Rearrange the values of nums according to the following rules: 
+
+    Sort the values at odd indices of nums in non-increasing order. Sort the values at even indices of nums in non-decreasing order. 
+    
+    Return the array formed after rearranging the values of nums.
+    """
+
+    def sortEvenOdd(self, nums):
+        odds = sorted([nums[i] for i in range(len(nums)) if i % 2 == 1])
+        evens = sorted([nums[i] for i in range(len(nums)) if i % 2 == 0], reverse=True)
+        return [evens.pop() if i % 2 == 0 else odds.pop() for i in range(len(nums))]
+
+    """
+    FIND ALL NUMBERS DISAPPEARED IN AN ARRAY
+
+    Given an array nums of n integers where nums[i] is in the range [1, n], return an array of all the integers in the range [1, n] that do not appear in nums.
+    """
+
+    def findDisappearedNumbers(self, nums):
+        counts = Counter(nums)
+        return [num for num in range(1, len(nums) + 1) if counts[num] == 0]
+
+    """
+    SELF DIVIDING NUMBERS
+    
+    A self-dividing number is a number that is divisible by every digit it contains.
+
+        - For example, 128 is a self-dividing number because 128 % 1 == 0, 128 % 2 == 0, and 128 % 8 == 0.
+
+    A self-dividing number is not allowed to contain the digit zero. Given two integers left and right, return a list of all the self-dividing numbers in the range [left, right].
+    """
+
+    def selfDividingNumbers(self, left, right):
+        
+        def checkselfdividing(num):
+            num_string = str(num)
+            return all(num_string[i] != '0' and num % int(num_string[i]) == 0 for i in range(len(num_string)))
+
+        # Use list comprehension to generate a list of the self-dividing numbers
+        return [num for num in range(left, right + 1) if checkselfdividing(num)]
+    
