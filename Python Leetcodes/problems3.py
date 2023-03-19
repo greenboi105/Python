@@ -833,13 +833,8 @@ class Solution:
         seen = set()
 
         while True:
-
             three_removal = 3 ** largestThree(current_num)
-
             if three_removal in seen: return False
-
             seen.add(three_removal)
-
             current_num -= three_removal
-
             if current_num == 0: return True
